@@ -2,6 +2,7 @@
 // Created by souzajbr on 08/09/2020.
 //
 
+#include "hash.h"
 #include <string.h>
 #include "document.h"
 #include "stdlib.h"
@@ -22,5 +23,35 @@ struct document *document_create(char *headline, char *shortDescription, char *l
     strcpy(doc->link, link);
 
     return doc;
+
+}
+
+struct document_list *document_list_create(struct document *doc) {
+    struct document_list* new = (struct document_list*) malloc(sizeof(struct document_list));
+    new->next = NULL;
+    new->doc = doc;
+    new->count = 1;
+
+    return new;
+}
+
+struct document_list* document_list_insert_aux(struct document_list* root, struct document* doc) {
+
+    if(root == NULL) {
+        return document_list_create(doc);
+
+    }
+
+    if(root->doc->id < doc->id)
+        root->next = document_list_insert_aux(root->next, doc);
+    else if(root->doc->id == doc->id)
+        root->count++;
+    else if (root->doc->id > doc->id) {
+        struct document_list* new = document_list_create(doc);
+        new->next = root;
+        return new;
+    }
+
+    return root;
 
 }

@@ -2,7 +2,6 @@
 // Created by souzajbr on 07/09/2020.
 //
 
-#include <string.h>
 #include "hash.h"
 
 /**
@@ -13,7 +12,7 @@
  * @param key is the key to be hashed
  * @return long the result hash
  */
-long polynomial_rolling_hash(char* key) {
+unsigned long polynomial_rolling_hash(char* key) {
     const int p = 173; // prime number near ASC2 character table size
     const int m = 1e9 +
                   9; // This is a large number, but still small enough so that we can perform multiplication of two values using 64 bit integers.
@@ -31,8 +30,8 @@ long polynomial_rolling_hash(char* key) {
 
 }
 
-long simple_hash(char* key) {
-    long hash = 0;
+unsigned long simple_hash(char* key) {
+    unsigned long hash = 0;
     char* aux = key;
 
     while(*aux != '\0') {
@@ -43,7 +42,7 @@ long simple_hash(char* key) {
     return hash;
 }
 
-struct hash_table* hash_table_create(int length) {
+struct hash_table* hash_table_create(int length, int hashFunction) {
 
     struct hash_table* ht = malloc(sizeof(struct hash_table));
     ht->table = malloc(sizeof(struct hash_table_list) * length);
@@ -54,14 +53,47 @@ struct hash_table* hash_table_create(int length) {
 
     ht->length = length;
 
+    switch (hashFunction) {
+        case HASH_FUNCTION_SIMPLE:
+            ht->hash = &simple_hash;
+            break;
+        case HASH_FUNCTION_POLYNOMIAL_ROLLING:
+            ht->hash = &polynomial_rolling_hash;
+            break;
+        default:
+            ht->hash = NULL;
+    }
     return ht;
 }
 
-void hash_table_insert(struct hash_table* hashTable, char* key, struct document* doc, hash_function hash) {
-    int pos = hash(key) % hashTable->length;
+struct hash_table_list *hash_table_list_create(const char *key) {
+    struct hash_table_list* new = (struct hash_table_list*) malloc(sizeof(struct hash_table_list));
+    new->docs = NULL;
+    new->key = malloc(strlen(key) + 1);
+    new->next = NULL;
+    strcpy(new->key, key);
+    return new;
+}
 
-    struct hash_table_list* new = malloc(sizeof(struct hash_table_list));
-    new->doc = doc;
-    new->next = hashTable->table[pos];
-    hashTable->table[pos] = new;
+void hash_table_insert(struct hash_table* hashTable, char* key, struct document* doc) {
+    int pos = (int) (hashTable->hash(key) % hashTable->length);
+
+    struct hash_table_list* aux = hashTable->table[pos];
+
+    while(true) {
+
+        if(aux == NULL) {
+            aux = hash_table_list_create(key);
+            aux->next = hashTable->table[pos];
+            hashTable->table[pos] = aux;
+        }
+
+        if( strcmp(aux->key, key) == 0) {
+            aux->docs = document_list_insert_aux(aux->docs, doc);
+            break;
+        }
+
+        aux = aux->next;
+    }
+
 }
