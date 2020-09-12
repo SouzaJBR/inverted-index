@@ -10,6 +10,9 @@ struct file_reader* file_reader_create(char* path) {
 
     FILE *f = fopen(path, "rb");
 
+    if(!f)
+        return NULL;
+
     // Get the file size
     fseek(f, 0, SEEK_END);
     long fileSize = ftell(f);

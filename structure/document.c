@@ -17,6 +17,7 @@ struct document *document_create(char *headline, char *shortDescription, char *l
     doc->headline = malloc(strlen(headline) + 1);
     doc->shortDescription = malloc(strlen(shortDescription) + 1);
     doc->link = malloc(strlen(link) + 1);
+    doc->distinctTokens = -1;
 
     strcpy(doc->headline, headline);
     strcpy(doc->shortDescription, shortDescription);

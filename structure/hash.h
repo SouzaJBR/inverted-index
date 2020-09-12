@@ -11,7 +11,7 @@
 
 #include "document.h"
 
-#define HASH_TABLE_SIZE 16963
+#define HASH_TABLE_SIZE 94723
 
 #define HASH_FUNCTION_SIMPLE 1
 #define HASH_FUNCTION_POLYNOMIAL_ROLLING 2
@@ -32,5 +32,6 @@ struct hash_table {
 
 struct hash_table* hash_table_create(int length, int hashFunction);
 void hash_table_insert(struct hash_table* hashTable, char* key, struct document* doc);
+struct document_list* hash_table_search(struct hash_table* hashTable, char* key);
 
 #endif //TRABALHO_AED_HASH_H

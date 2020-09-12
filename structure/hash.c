@@ -97,3 +97,20 @@ void hash_table_insert(struct hash_table* hashTable, char* key, struct document*
     }
 
 }
+
+struct document_list* hash_table_search(struct hash_table* hashTable, char* key) {
+
+    int pos = (int) (hashTable->hash(key) % hashTable->length);
+
+    struct hash_table_list* aux = hashTable->table[pos];
+
+    while(true) {
+        if(aux == NULL)
+            return NULL;
+
+        if(strcmp(aux->key, key) == 0)
+            return aux->docs;
+
+        aux = aux->next;
+    }
+}

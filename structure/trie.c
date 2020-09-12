@@ -8,6 +8,9 @@
 struct trie* trie_create() {
 
     struct trie* new = malloc(sizeof(struct trie));
+    for(int i = 0; i < TRIE_ALPHABET_SIZE; i++)
+        new->root.child[i] = NULL;
+
     return new;
 
 }
@@ -24,6 +27,8 @@ struct trie_node* trie_insert_aux(struct trie_node* root, char* key, int pos, in
 
     if (root == NULL) {
         root = malloc(sizeof(struct trie_node));
+        for(int i = 0; i < TRIE_ALPHABET_SIZE; i++)
+            root->child[i] = NULL;
         root->isKey = false;
     }
 
@@ -33,7 +38,7 @@ struct trie_node* trie_insert_aux(struct trie_node* root, char* key, int pos, in
     }
 
     if(pos + 1 < length) {
-        int child = (int) trie_calculate_position(key[pos]) % 36;
+        int child =  ((unsigned int) trie_calculate_position(key[pos]) % TRIE_ALPHABET_SIZE);
         root->child[child] = trie_insert_aux(root->child[child], key, pos + 1, length, doc);
     }
     return root;

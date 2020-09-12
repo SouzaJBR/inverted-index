@@ -14,8 +14,8 @@ struct document {
     int id;
     char* headline;
     char* shortDescription;
-    char* url;
     char* link;
+    int distinctTokens;
 };
 
 struct document_list {
