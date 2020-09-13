@@ -9,11 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <wchar.h>
 
 struct document {
     int id;
-    char* headline;
-    char* shortDescription;
+    wchar_t * headline;
+    wchar_t * shortDescription;
     char* link;
     int distinctTokens;
 };
@@ -24,7 +25,7 @@ struct document_list {
     int count;
 };
 
-struct document* document_create(char* headline, char* shortDescription, char* link);
+struct document* document_create(char *headline, char *shortDescription, char* link);
 struct document_list *document_list_create(struct document *doc);
 struct document_list* document_list_insert_aux(struct document_list* root, struct document* doc);
 

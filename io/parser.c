@@ -8,7 +8,10 @@
 #include <stdio.h>
 #include "parser.h"
 
-char buffer[256];
+#define ACCENT_CHARS    "ÁÀÃÂÇáàãâçÉÊéêÍíÑÓÔÕñóôõÚÜúü"
+#define UNACCENT_CHARS  "AAAACaaaacEEeeIiNOOOnoooUUuu"
+
+wchar_t buffer[256];
 int bufferPos = 0;
 
 char *stopwords[127] = {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself",
@@ -23,7 +26,7 @@ char *stopwords[127] = {"i", "me", "my", "myself", "we", "our", "ours", "ourselv
                         "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so",
                         "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"};
 
-bool parser_is_stopword(char* word) {
+bool parser_is_stopword(wchar_t *word) {
 
     for(int i = 0; i < 127; i++) {
         if(strcmp(word, stopwords[i]) == 0)
@@ -41,10 +44,10 @@ bool parser_is_letter(char c) {
     return c >= 97 && c <= 122;
 }
 
-bool parser_is_separator(char c) {
+bool parser_is_separator(wchar_t c) {
 
 
-    if(isblank(c) != 0 || c == '\0')
+    if(iswblank(c) != 0 || c == L'\0')
         return true;
 
     return false;
@@ -58,17 +61,14 @@ bool parser_is_skip_char(char c) {
     return false;
 }
 
-char parser_normalize_char(char c) {
+wchar_t parser_normalize_char(wchar_t c) {
 
-    if (c >= 65 && c <= 90) // toLowerCase
-        return c += 32;
 
-    if (c == "à")
-        return 'a';
+
     return c;
 }
 
-struct parser *parser_create(char *input) {
+struct parser *parser_create(wchar_t *input) {
     struct parser *new = malloc(sizeof(struct parser));
     new->input = input;
     new->pos = 0;
@@ -76,19 +76,19 @@ struct parser *parser_create(char *input) {
     return new;
 }
 
-char *parser_get_next_token(struct parser *parser) {
+wchar_t * parser_get_next_token(struct parser *parser) {
 
     bufferPos = 0;
 
 
     while (true) {
-        char c = parser->input[parser->pos++];
+        wchar_t c = parser->input[parser->pos++];
 
         if (parser_is_separator(c)) { //if is a separator, return the token found
             if (bufferPos > 0) {
-                buffer[bufferPos] = '\0';
-                char *token = malloc(bufferPos + 1);
-                strcpy(token, buffer);
+                buffer[bufferPos] = L'\0';
+                wchar_t *token = malloc(sizeof(wchar_t) * (bufferPos + 1));
+                wcscpy(token, buffer);
                 return token;
             }
             if (c == '\0') //EOS
@@ -98,9 +98,13 @@ char *parser_get_next_token(struct parser *parser) {
         c = parser_normalize_char(c);
         if (bufferPos == 0) //tokens should start with letters
         {
-            if (!parser_is_letter(c))
-                continue;
+            if (!iswalpha(c)) {
+                while (!parser_is_separator((c = parser->input[parser->pos++]))) continue;
 
+                if (c == L'\0') return NULL;
+
+                continue;
+            }
             buffer[bufferPos++] = c;
         } else {
             if (!parser_is_skip_char(c))

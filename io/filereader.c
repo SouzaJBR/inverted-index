@@ -3,7 +3,7 @@
 //
 
 #include "filereader.h"
-
+#include "wchar.h"
 
 struct file_reader* file_reader_create(char* path) {
     struct file_reader* fr = (struct file_reader*) malloc(sizeof(struct file_reader));
@@ -21,7 +21,7 @@ struct file_reader* file_reader_create(char* path) {
     // Read all its content
     char* content = malloc(fileSize + 3); // 3 = '\0', '['  e ']'
     content[0] = '[';
-    fread(content+1, 1, fileSize, f);
+    fread(content+1, sizeof(wchar_t), fileSize, f);
     fclose(f);
 
     for(long i = 0; i < fileSize; i++)
@@ -45,6 +45,8 @@ struct document* file_reader_get_next_document(struct file_reader* fr) {
     cJSON *link = cJSON_GetObjectItem(json, "link");
     cJSON *authors = cJSON_GetObjectItem(json, "authors");
     cJSON *short_description = cJSON_GetObjectItem(json, "short_description");
+
+
 
     struct document* doc = document_create(headline->valuestring, short_description->valuestring, link->valuestring);
 

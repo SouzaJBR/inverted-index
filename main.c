@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <wchar.h>
+#include <locale.h>
 
 #include "io/filereader.h"
 #include "io/parser.h"
@@ -9,6 +11,7 @@
 #include "rank.h"
 #include "stdbool.h"
 
+
 bool useHash = true;
 
 
@@ -16,10 +19,61 @@ void initialize() {
 
 }
 
+int main() {
+
+    setlocale(LC_ALL, "");
+//    char *str = "çhis is tutorialspoint.com\nÇa va bien";
+//
+//    wchar_t* x = calloc(100, sizeof(wchar_t));
+//    char* y = calloc(100, sizeof(char ));
+//
+//
+//    size_t ss = mbstowcs(x, str, 100);
+//
+//    if(x[0] == L'ç') {
+//
+//    }
+
+//    return 0;
+    char* path = "/home/souzajbr/codez/inverted-index/data/dataset.json";
+
+    FILE *f = fopen(path, "rb");
+
+    fseek(f, 0, SEEK_END);
+    int fileSize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    printf("File Size: %ld bytes\n", fileSize);
+
+    int i = 0;
+
+
+    wchar_t * content = calloc(sizeof(wchar_t) * (fileSize + 3), sizeof(wchar_t)); // 3 = '\0', '['  e ']'
+    char * buffer = calloc(sizeof(wchar_t) * (fileSize + 3), sizeof(char ));
+
+
+
+    buffer[0] = '[';
+    fread(buffer + 1,sizeof(char*), (int) fileSize, f);
+    fclose(f);
+
+//    for(long i = 0; i < fileSize; i++)
+//        if(content[i] == '\n') content[i] = ',';
+
+    buffer[fileSize-1] = L']';
+    buffer[fileSize] = 0; //NULL-termination string
+
+    size_t ss = mbstowcs(content, buffer, fileSize);
+
+    printf("-\n%s\n-\n", content);
+
+    return 0;
+}
+
 bool select_structure() {
 
     printf("\nSelecione uma estrutura:\n\t1 - Hash\n\t2 - Trie\n>");
-    char c = getchar();
+    char c = (char) getchar();
     getchar(); //Capture <ENTER>
 
     switch (c) {
@@ -34,7 +88,9 @@ bool select_structure() {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main2(int argc, char *argv[]) {
+
+
 
     if(argc < 2) {
         printf("USO: %s <json_entrada>\n", argv[0]);

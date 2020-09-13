@@ -7,14 +7,18 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <wctype.h>
+#include <wchar.h>
 
 struct parser {
-    char * input;
+    wchar_t *input;
     int pos;
 };
 
-struct parser* parser_create(char* input);
-char* parser_get_next_token(struct parser* parser);
-bool parser_is_stopword(char* word);
+struct parser *parser_create(wchar_t *input);
+
+wchar_t *parser_get_next_token(struct parser *parser);
+
+bool parser_is_stopword(wchar_t *word);
 
 #endif //TRABALHO_AED_PARSER_H

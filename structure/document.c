@@ -13,14 +13,17 @@ struct document *document_create(char *headline, char *shortDescription, char *l
 
     struct document* doc = (struct document*) malloc(sizeof(struct document));
 
+    size_t headlineLength = strlen(headline) + 1;
+    size_t shortDescriptionLength = strlen(shortDescription) + 1;
+
     doc->id = current_document_id++;
-    doc->headline = malloc(strlen(headline) + 1);
-    doc->shortDescription = malloc(strlen(shortDescription) + 1);
+    doc->headline = malloc(sizeof(wchar_t) * headlineLength);
+    doc->shortDescription = malloc(sizeof(wchar_t) * shortDescriptionLength);
     doc->link = malloc(strlen(link) + 1);
     doc->distinctTokens = -1;
 
-    strcpy(doc->headline, headline);
-    strcpy(doc->shortDescription, shortDescription);
+    mbstowcs(doc->headline, headline, headlineLength);
+    mbstowcs(doc->shortDescription, shortDescription, shortDescriptionLength);
     strcpy(doc->link, link);
 
     return doc;
