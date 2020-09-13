@@ -17,8 +17,11 @@ struct parser {
 
 struct parser *parser_create(wchar_t *input);
 
-wchar_t *parser_get_next_token(struct parser *parser);
 
-bool parser_is_stopword(wchar_t *word);
+char * parser_get_next_token(struct parser *parser);
+
+bool parser_is_stopword(char *word);
+
+void parser_destroy(struct parser* parser);
 
 #endif //TRABALHO_AED_PARSER_H

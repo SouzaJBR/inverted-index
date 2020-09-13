@@ -37,15 +37,23 @@ struct file_reader* file_reader_create(char* path) {
     return fr;
 }
 
+void file_reader_destroy(struct file_reader* fr) {
+    cJSON_Delete(fr->root);
+    free(fr);
+}
+
 struct document* file_reader_get_next_document(struct file_reader* fr) {
 
     cJSON* json = fr->current;
+
+    if(json == NULL)
+        return NULL;
+
     cJSON *category = cJSON_GetObjectItem(json, "category");
     cJSON *headline = cJSON_GetObjectItem(json, "headline");
     cJSON *link = cJSON_GetObjectItem(json, "link");
     cJSON *authors = cJSON_GetObjectItem(json, "authors");
     cJSON *short_description = cJSON_GetObjectItem(json, "short_description");
-
 
 
     struct document* doc = document_create(headline->valuestring, short_description->valuestring, link->valuestring);

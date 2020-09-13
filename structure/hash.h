@@ -11,7 +11,7 @@
 
 #include "document.h"
 
-#define HASH_TABLE_SIZE 94723
+#define HASH_TABLE_SIZE 180181
 
 #define HASH_FUNCTION_SIMPLE 1
 #define HASH_FUNCTION_POLYNOMIAL_ROLLING 2

@@ -19,6 +19,7 @@ struct file_reader {
 };
 
 struct file_reader* file_reader_create(char* path);
+void file_reader_destroy(struct file_reader* fr);
 struct document* file_reader_get_next_document(struct file_reader* fr);
 
 

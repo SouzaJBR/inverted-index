@@ -11,7 +11,7 @@
 #define ACCENT_CHARS    "ÁÀÃÂÇáàãâçÉÊéêÍíÑÓÔÕñóôõÚÜúü"
 #define UNACCENT_CHARS  "AAAACaaaacEEeeIiNOOOnoooUUuu"
 
-wchar_t buffer[256];
+wchar_t buffer[4096];
 int bufferPos = 0;
 
 char *stopwords[127] = {"i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself",
@@ -26,7 +26,7 @@ char *stopwords[127] = {"i", "me", "my", "myself", "we", "our", "ours", "ourselv
                         "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so",
                         "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"};
 
-bool parser_is_stopword(wchar_t *word) {
+bool parser_is_stopword(char *word) {
 
     for(int i = 0; i < 127; i++) {
         if(strcmp(word, stopwords[i]) == 0)
@@ -46,8 +46,7 @@ bool parser_is_letter(char c) {
 
 bool parser_is_separator(wchar_t c) {
 
-
-    if(iswblank(c) != 0 || c == L'\0')
+    if(iswblank(c) != 0 || iswcntrl(c) != 0)
         return true;
 
     return false;
@@ -63,9 +62,69 @@ bool parser_is_skip_char(char c) {
 
 wchar_t parser_normalize_char(wchar_t c) {
 
+    if(iswdigit(c))
+        return c;
 
+    c = towlower(c);
 
-    return c;
+    switch (c) {
+        case L'a':
+        case L'b':
+        case L'c':
+        case L'd':
+        case L'e':
+        case L'f':
+        case L'g':
+        case L'h':
+        case L'i':
+        case L'j':
+        case L'k':
+        case L'l':
+        case L'm':
+        case L'n':
+        case L'o':
+        case L'p':
+        case L'q':
+        case L'r':
+        case L's':
+        case L't':
+        case L'u':
+        case L'v':
+        case L'w':
+        case L'x':
+        case L'y':
+        case L'z':
+            return c;
+        case L'á':
+        case L'ã':
+        case L'à':
+        case L'â':
+        case L'ä':
+        case L'å':
+        case L'æ':
+            return 'a';
+        case L'ç':
+            return 'c';
+        case L'é':
+        case L'è':
+        case L'ê':
+        case L'ë':
+            return L'e';
+        case L'ì':
+        case L'í':
+        case L'î':
+        case L'ï':
+            return L'i';
+        case L'ò':
+        case L'ô':
+        case L'ó':
+        case L'ö':
+        case L'õ':
+            return L'o';
+        default:
+            return L' ';
+    }
+
 }
 
 struct parser *parser_create(wchar_t *input) {
@@ -76,7 +135,11 @@ struct parser *parser_create(wchar_t *input) {
     return new;
 }
 
-wchar_t * parser_get_next_token(struct parser *parser) {
+void parser_destroy(struct parser* parser) {
+    free(parser);
+}
+
+char * parser_get_next_token(struct parser *parser) {
 
     bufferPos = 0;
 
@@ -87,8 +150,9 @@ wchar_t * parser_get_next_token(struct parser *parser) {
         if (parser_is_separator(c)) { //if is a separator, return the token found
             if (bufferPos > 0) {
                 buffer[bufferPos] = L'\0';
-                wchar_t *token = malloc(sizeof(wchar_t) * (bufferPos + 1));
-                wcscpy(token, buffer);
+                char *token = malloc(sizeof(char) * (bufferPos + 1));
+
+                wcstombs(token, buffer, bufferPos + 1);
                 return token;
             }
             if (c == '\0') //EOS
@@ -96,6 +160,10 @@ wchar_t * parser_get_next_token(struct parser *parser) {
         }
 
         c = parser_normalize_char(c);
+
+        if(c == L' ')
+            continue;
+
         if (bufferPos == 0) //tokens should start with letters
         {
             if (!iswalpha(c)) {

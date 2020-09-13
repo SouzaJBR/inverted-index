@@ -76,6 +76,8 @@ struct hash_table_list *hash_table_list_create(const char *key) {
 }
 
 void hash_table_insert(struct hash_table* hashTable, char* key, struct document* doc) {
+
+
     int pos = (int) (hashTable->hash(key) % hashTable->length);
 
     struct hash_table_list* aux = hashTable->table[pos];
@@ -99,6 +101,10 @@ void hash_table_insert(struct hash_table* hashTable, char* key, struct document*
 }
 
 struct document_list* hash_table_search(struct hash_table* hashTable, char* key) {
+
+    if(key == NULL || strcmp("", key) == 0){
+        return NULL;
+    }
 
     int pos = (int) (hashTable->hash(key) % hashTable->length);
 

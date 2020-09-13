@@ -16,18 +16,25 @@ bool vector_compare_doc_relev(void* c1, void* c2) {
 }
 
 struct vector* vector_create(vector_compare compare) {
+
     struct vector* new = malloc(sizeof(struct vector));
+
     new->array = malloc(sizeof(void *) * VECTOR_ARRAY_SIZE);
     new->length = 0;
     new->arraySize = VECTOR_ARRAY_SIZE;
     new->compare = compare;
 }
+
+void vector_destroy(struct vector* vector) {
+    free(vector->array);
+    free(vector);
+}
 void vector_insert(struct vector* vector, void* object) {
 
     if(vector->length + 1 >= vector->arraySize)
     {
-        vector->array = realloc(vector->array, vector->arraySize + VECTOR_ARRAY_SIZE);
-        vector->arraySize = vector->arraySize + VECTOR_ARRAY_SIZE;
+        vector->arraySize += VECTOR_ARRAY_SIZE;
+        vector->array = realloc(vector->array, sizeof(void *) * vector->arraySize);
     }
 
     vector->array[vector->length++] = object;

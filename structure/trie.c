@@ -49,3 +49,21 @@ void trie_insert(struct trie* trie, char* key, struct document* doc) {
     int length = strlen(key);
     trie_insert_aux(&trie->root, key, 0, length, doc);
 }
+
+struct document_list* trie_search_aux(struct trie_node* root, char* keyword, int pos, int length) {
+    if (root == NULL) return NULL;
+
+    if(pos + 1 == length)
+        return root->docs;
+
+    int child =  ((unsigned int) trie_calculate_position(keyword[pos]) % TRIE_ALPHABET_SIZE);
+    return trie_search_aux(root->child[child], keyword, pos + 1, length);
+}
+
+struct document_list* trie_search(struct trie* trie, char* keyword) {
+
+    if(trie != NULL && keyword != NULL && strcmp("", keyword) != 0)
+        return trie_search_aux(&trie->root, keyword, 0, strlen(keyword));
+
+    return NULL;
+}

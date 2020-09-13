@@ -53,7 +53,13 @@ int rank_get_document_unique_tokens(struct document* doc) {
         if(!vector_contains(vector, aux))
             vector_insert(vector, aux);
 
-    return vector->length;
+    int count = vector->length;
+    vector_destroy(vector);
+
+    free(pHead);
+    free(pDesc);
+
+    return count;
 }
 
 int rank_get_total_documents_containing(struct document_list* list) {
@@ -76,7 +82,7 @@ struct vector* rank_join_results(struct vector* query1, struct vector* query2) {
     struct vector* result = vector_create(&vector_compare_doc_relev);
 
     int pos1 = 0, pos2 = 0;
-    while(pos1 < query1->length || pos2 < query2->length) {
+    while(pos1 < query1->length && pos2 < query2->length) {
         struct document_relevancy* d1 = query1->array[pos1];
         struct document_relevancy* d2 = query2->array[pos2];
 
@@ -96,6 +102,15 @@ struct vector* rank_join_results(struct vector* query1, struct vector* query2) {
             pos1++;
             pos2++;
         }
+    }
+
+    while (pos1 < query1->length) {
+        struct document_relevancy* d1 = query1->array[pos1++];
+        vector_insert(result, d1);
+    }
+    while (pos2 < query2->length){
+        struct document_relevancy* d2 = query2->array[pos2++];
+        vector_insert(result, d2);
     }
 
     return result;

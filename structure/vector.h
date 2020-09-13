@@ -6,7 +6,7 @@
 #define TRABALHO_AED_VECTOR_H
 
 #include <stdbool.h>
-#define VECTOR_ARRAY_SIZE 4096
+#define VECTOR_ARRAY_SIZE 2048
 typedef bool (*vector_compare)(void*,void*);
 
 struct vector {
@@ -22,6 +22,7 @@ bool vector_contains(struct vector* vector, void* object);
 bool vector_compare_string(void* c1, void* c2);
 bool vector_compare_doc_relev(void* c1, void* c2);
 void* vector_search(struct vector* vector, void* object);
+void vector_destroy(struct vector* vector);
 
 
 #endif //TRABALHO_AED_VECTOR_H
