@@ -2,15 +2,25 @@
 // Created by souzajbr on 08/09/2020.
 //
 
+
+#include "stdbool.h"
+
+#include "../structure/trie.h"
+#include "../structure/hash.h"
+
+#include <locale.h>
+
+#include <stdio.h>
 #include "filereader.h"
 #include "wchar.h"
+#include "parser.h"
 
-struct file_reader* file_reader_create(char* path) {
-    struct file_reader* fr = (struct file_reader*) malloc(sizeof(struct file_reader));
+struct file_reader *file_reader_create(char *path) {
+    struct file_reader *fr = (struct file_reader *) malloc(sizeof(struct file_reader));
 
     FILE *f = fopen(path, "rb");
 
-    if(!f)
+    if (!f)
         return NULL;
 
     // Get the file size
@@ -19,15 +29,15 @@ struct file_reader* file_reader_create(char* path) {
     fseek(f, 0, SEEK_SET);
 
     // Read all its content
-    char* content = malloc(fileSize + 3); // 3 = '\0', '['  e ']'
+    char *content = malloc(fileSize + 3); // 3 = '\0', '['  e ']'
     content[0] = '[';
-    fread(content+1, sizeof(wchar_t), fileSize, f);
+    fread(content + 1, sizeof(wchar_t), fileSize, f);
     fclose(f);
 
-    for(long i = 0; i < fileSize; i++)
-        if(content[i] == '\n') content[i] = ',';
+    for (long i = 0; i < fileSize; i++)
+        if (content[i] == '\n') content[i] = ',';
 
-    content[fileSize-1] = ']';
+    content[fileSize - 1] = ']';
     content[fileSize] = 0; //NULL-termination string
 
     fr->root = cJSON_Parse(content);
@@ -37,16 +47,16 @@ struct file_reader* file_reader_create(char* path) {
     return fr;
 }
 
-void file_reader_destroy(struct file_reader* fr) {
+void file_reader_destroy(struct file_reader *fr) {
     cJSON_Delete(fr->root);
     free(fr);
 }
 
-struct document* file_reader_get_next_document(struct file_reader* fr) {
+struct document *file_reader_get_next_document(struct file_reader *fr) {
 
-    cJSON* json = fr->current;
+    cJSON *json = fr->current;
 
-    if(json == NULL)
+    if (json == NULL)
         return NULL;
 
     cJSON *category = cJSON_GetObjectItem(json, "category");
@@ -56,9 +66,42 @@ struct document* file_reader_get_next_document(struct file_reader* fr) {
     cJSON *short_description = cJSON_GetObjectItem(json, "short_description");
 
 
-    struct document* doc = document_create(headline->valuestring, short_description->valuestring, link->valuestring);
+    struct document *doc = document_create(headline->valuestring, short_description->valuestring, link->valuestring);
 
     fr->current = json->next;
 
     return doc;
+}
+
+int file_reader_load_documents(struct file_reader *fr, void *structure, insert_function insert) {
+    int i = 0;
+
+    while (true) {
+        if (i % 10000 == 0)
+            wprintf(L"Inserted %d documents.\n", i);
+
+        char *token;
+        struct document *doc = file_reader_get_next_document(fr);
+
+        if (doc == NULL)
+            break;
+
+        i++;
+
+        struct parser *parserHeadline = parser_create(doc->headline);
+        struct parser *parserDescription = parser_create(doc->shortDescription);
+        while ((token = parser_get_next_token(parserHeadline)) != NULL) {
+
+            if (!parser_is_stopword(token))
+                insert(structure, token, doc);
+
+        }
+        while ((token = parser_get_next_token(parserDescription)) != NULL) {
+            if (!parser_is_stopword(token))
+                insert(structure, token, doc);
+
+        }
+    }
+
+    return i;
 }
