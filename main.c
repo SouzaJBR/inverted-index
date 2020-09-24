@@ -12,7 +12,6 @@
 #include "stdbool.h"
 
 #include <math.h>
-#include "tests/test_hash.h"
 
 #define ascii_divider "`'. .'`'. .'`'. .'`'. .'`'. .'`'. .'`'. .'`'. .'`'. .'`'. .'\n   `     `     `     `     `     `     `     `     `     `"
 
