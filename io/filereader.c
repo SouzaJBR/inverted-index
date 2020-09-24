@@ -29,15 +29,27 @@ struct file_reader *file_reader_create(char *path) {
     fseek(f, 0, SEEK_SET);
 
     // Read all its content
-    char *content = malloc(fileSize + 3); // 3 = '\0', '['  e ']'
+    char *content = (char *) malloc(fileSize + 3); // 3 = '\0', '['  e ']'
+
+    /* The dataset file format is not a valid JSON array.
+     * It contains a document object per line.
+     * So, before using the JSON parser, we need to correct it
+     * with array tokens and replacing new-lines with a comma 
+     */
+
     content[0] = '[';
-    fread(content + 1, sizeof(wchar_t), fileSize, f);
+    size_t totalChars = fread(content + 1, sizeof(char), fileSize, f);
+
+    if((totalChars + 1) * sizeof(char) < fileSize)
+        return NULL;
+
     fclose(f);
 
+    // Array separation
     for (long i = 0; i < fileSize; i++)
         if (content[i] == '\n') content[i] = ',';
 
-    content[fileSize - 1] = ']';
+    content[fileSize - 1] = ']'; // Close array token
     content[fileSize] = 0; //NULL-termination string
 
     fr->root = cJSON_Parse(content);
